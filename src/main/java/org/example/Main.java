@@ -10,14 +10,16 @@ public class Main {
     public static final ThreadLocal<DummyRequestContext> TL_REQUEST_DATA = ThreadLocal.withInitial(DummyRequestContext::new);
 
     public static void main(String[] args) {
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        IntStream.range(1,EXECUTION_ROUNDS)
-            .parallel()
-            .mapToObj(i-> UUID.randomUUID().toString())
-            .forEach(requestId -> executorService.execute(()-> {
-                TL_REQUEST_DATA.get().setRequestId(requestId);
-                DummyWorkflowSimulation.handleRequest();}
-                ));
-        executorService.shutdown();
+        try (ExecutorService executorService = Executors.newFixedThreadPool(10)) {
+            IntStream.range(1, EXECUTION_ROUNDS)
+                .parallel()
+                .mapToObj(i -> UUID.randomUUID().toString())
+                .forEach(requestId -> executorService.execute(() -> {
+                        TL_REQUEST_DATA.get().setRequestId(requestId);
+                        DummyWorkflowSimulation.handleRequest();
+                    }
+                    ));
+            executorService.shutdown();
+        }
     }
 }
