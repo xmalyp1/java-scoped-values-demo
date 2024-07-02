@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.UUID;
+
 public class DummyRequestContext {
 
     private String token;

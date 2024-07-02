@@ -1,21 +1,20 @@
 package org.example;
 
+import static org.example.Main.TL_REQUEST_DATA;
+
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DummyWorkflowSimulation {
     static Logger logger = Logger.getLogger(DummyWorkflowSimulation.class.getName());
-    final static ThreadLocal<DummyRequestContext> TL_SESSION_DATA = ThreadLocal.withInitial(DummyRequestContext::new);
-    public static void handleRequest(String requestId) {
-
-        DummyRequestContext requestContext = TL_SESSION_DATA.get();
-        requestContext.setRequestId(requestId);
-        if(requestContext.getToken() == null) {
-            requestContext.setToken(requestId + UUID.randomUUID());
+    public static void handleRequest() {
+        DummyRequestContext requestContext = TL_REQUEST_DATA.get();
+        if(requestContext.getToken() == null){
+            requestContext.setToken(generateToken(requestContext.getRequestId()));
         }
         validateToken(requestContext);
-        TL_SESSION_DATA.set(requestContext);
+        logger.log(Level.INFO,String.format("Handling request: %s",requestContext.getRequestId()));
     }
 
     private static void validateToken(DummyRequestContext requestContext){
@@ -25,6 +24,10 @@ public class DummyWorkflowSimulation {
         }else{
             logger.log(Level.FINE,"Token is valid for context: "+requestContext.getRequestId());
         }
+    }
+
+    private static String generateToken(String requestId){
+        return requestId + UUID.randomUUID();
     }
 
 }
